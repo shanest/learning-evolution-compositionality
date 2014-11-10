@@ -47,3 +47,22 @@ def plotLinearRegression():
     plt.plot(x, avgdiff, 'bo')
     plt.plot(xx, theline, 'r')
     plt.show()
+
+def plotHistograms():
+
+    withLabels = True
+
+    for i in [2,3,4,5,6,7]:
+        neg = np.loadtxt('data/exp1_N'+str(i)+'_neggame_finalexps.txt')
+        atom = np.loadtxt('data/exp1_N'+str(i)+'_recA_finalexps.txt')
+        plt.hist([neg, atom], range=(.5, .999999), label=['neg','atom'])
+        fname = 'data/exp1_hist_N'+str(i)
+        if withLabels:
+            plt.title('Payoff distribution for N='+str(i))
+            plt.ylabel('Number of trials')
+            plt.xlabel(r'$\pi ( \sigma , \rho )$')
+            plt.legend(loc='upper left')
+            fname = fname + '_withlabels'
+        fname = fname + '.png'
+        plt.savefig(fname)
+        plt.clf()
