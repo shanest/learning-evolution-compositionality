@@ -31,6 +31,17 @@ def writeAverages():
     np.savetxt('data/exp1_avg_neg.txt', avgN)
     np.savetxt('data/exp1_avg_negMINUSrecA.txt', avgdiff)
 	
+def writeTtests():
+
+    ttests = []
+    finalA = []
+    finalN = []
+    for N in [2,3,4,5,6,7]:
+        finalA.append(np.loadtxt('data/exp1_N'+str(N)+'_recA_finalexps.txt'))
+        finalN.append(np.loadtxt('data/exp1_N'+str(N)+'_neggame_finalexps.txt'))
+        ttests.append(stats.ttest_ind(finalA[-1], finalN[-1], equal_var=False))
+    print ttests
+    np.savetxt('data/exp1_analysis_ttests.txt', ttests)
 
 def saveLinearRegression():
 
@@ -46,6 +57,9 @@ def plotLinearRegression():
     theline = map(lambda x: intercept + slope*x, xx)
     plt.plot(x, avgdiff, 'bo')
     plt.plot(xx, theline, 'r')
+    plt.xlabel(r'$n$')
+    plt.ylabel(r'$Diff_n$')
+    plt.title('Difference in Mean Payoffs vs. Number of States')
     plt.show()
 
 def plotHistograms():
