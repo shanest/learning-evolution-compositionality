@@ -99,43 +99,52 @@ class NegationReceiver(Receiver):
 
 class FunctionReceiver(Receiver):
 
-	def __init__(self, signals, actions, strategy, numFuncs=3, recordChoices=True, recordStrats=True):
+	def __init__(self, signals, actions, strategy, func, numFuncs=3, recordChoices=True, recordStrats=True):
 		Receiver.__init__(self, signals, actions, strategy, recordChoices, recordStrats)
-		#define the 'negation' function as any Derangement
-		#should I make this a parameter?
                 self._numFuncs = numFuncs
 		self._funcs = []
-                for i in range(numFuncs):
-                    self._funcs.append(util.derange(list(self.actions)))
+                self._funcHist = []
+                #func is a derangement, i.e. a negation
+                self._funcs.append(func)
+                #range gives the identity function
+                self._funcs.append(range(len(actions)))
+                #zeros is constant function
+                self._funcs.append(np.ones(len(actions), dtype=np.int).tolist())
                 self._funcWeights = np.ones((numFuncs))
                 print self.actions
 		print(self._funcs)
 
 	def getAction(self, signal):
 		#using signal[-1] covers the len1/2 case uniformly
-                theFunc = util.weighted_choice(zip(range(self._numFuncs), self._funcWeights))
 		theAct = util.weighted_choice(zip(self.actions, self.strategy[signal[-1]]))
                 #theAct = np.random.choice(self.actions, p=util.normalize(self.strategy[signal[-1]]))
 		if len(signal) == 1:
 			self._choiceHistory.append((signal, theAct))
 			return theAct
 		else:
-			self._choiceHistory.append((signal, (theFunc, theAct)))
-			return self._funcs[theFunc][theAct]
+                        theFunc = util.weighted_choice(zip(range(self._numFuncs), self._funcWeights))
+                        finalAct = self._funcs[theFunc][theAct]
+			self._choiceHistory.append((signal, (theFunc, finalAct)))
+			return finalAct
 		
 	def getPaid(self, amount):
 		prevChoice = self._choiceHistory[-1]
+                #print prevChoice
 		sig = prevChoice[0]
+                #only reinforce function choice
 		if len(sig) == 1:
-			self.strategy[sum(sig), prevChoice[1]] += amount
+                        assert True
+			#self.strategy[sum(sig), prevChoice[1]] += amount
 		elif len(sig) == 2:
                         self._funcWeights[prevChoice[1][0]] += amount
-			self.strategy[sig[1], self._funcs[prevChoice[1][0]].index(prevChoice[1][1])] += amount
+			#self.strategy[sig[1], self._funcs[prevChoice[1][0]].index(prevChoice[1][1])] += amount
 		else:
 			assert False, "Got to bad place in reinforcment of NegationReceiver"
 		if self._recordStrats:
-			self._stratHistory = np.concatenate((self._stratHistory, [self.getNormalizedStrategy()]))
-
+                    self.recordStrategy()
+                    #TODO: record funcWeights
+                    self._funcHist.append(util.normalize(self._funcWeights))
+		
 	def getProb(self, act, sig):
 		normStrat = self.getNormalizedStrategy()
 		if len(sig) == 1:
@@ -145,6 +154,8 @@ class FunctionReceiver(Receiver):
                         funcProbs = util.normalize(self._funcWeights)
                         tot = 0.0
                         for i in range(len(funcProbs)):
-                            tot += funcProbs[i] * normStrat[sig[1], self._funcs[i].index(act)]
+                            #need to make sure act is in range of func b/c of constant one
+                            if act in self._funcs[i]:
+                                tot += funcProbs[i] * normStrat[sig[1], self._funcs[i].index(act)]
                         return tot
 			#return normStrat[sig[1], self._func.index(act)]

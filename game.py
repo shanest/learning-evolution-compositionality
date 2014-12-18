@@ -2,7 +2,7 @@ import numpy as np
 import random
 import util
 
-from sender import Sender, NegationSender
+from sender import Sender, NegationSender, FixedNegationSender
 from receiver import * 
 
 class Game(object):
@@ -77,4 +77,32 @@ class NegGame(Game):
 			receiver = NegationReceiver(signals, actions, np.ones((N,len(actions))), self._func)
 		elif rectype=='F':
 			receiver = FunctionReceiver(signals, actions, np.ones((N,len(actions))))
+		Game.__init__(self, sender, receiver, states, signals, actions, payoffs)
+
+class FuncGame(Game):
+
+	def __init__(self, N, rectype='F', stateProbs=[]):
+		realN = 2*N
+		states = range(realN)
+		actions = range(realN)
+		signals = [[i] for i in range(N)] + [[N,i] for i in range(N)]
+		payoffs = np.identity(realN)
+                #a particular derangement: i ---> i+1
+		self._func = np.roll(list(states), -1).tolist()
+
+                #initialize sender and receiver to be in sig system
+                sendStrat = np.zeros((len(states),N+1))
+                for i in range(N):
+                    sendStrat[2*i, i] = 1.0
+                    sendStrat[2*i + 1, N] = 1.0
+		sender = FixedNegationSender(states, signals, sendStrat, self._func)
+		if rectype=='A':
+			receiver = AtomicReceiver(signals, actions, np.ones((len(signals),len(actions))))
+		elif rectype=='N':
+			receiver = NegationReceiver(signals, actions, np.ones((N,len(actions))), self._func)
+		elif rectype=='F':
+                        recStrat = np.zeros((N, len(actions)))
+                        for i in range(N):
+                            recStrat[i, 2*i] = 1.0
+			receiver = FunctionReceiver(signals, actions, recStrat, self._func)
 		Game.__init__(self, sender, receiver, states, signals, actions, payoffs)

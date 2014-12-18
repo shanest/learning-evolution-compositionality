@@ -70,6 +70,7 @@ class NegationSender(Sender):
 		if len(sig) == 1:
 			return normStrat[state, sum(sig)]
 		elif len(sig) == 2:
+                        #print normStrat[self.func.index(state)][:-1]
 			return normStrat[state, sig[0]] * util.normalize(normStrat[self.func.index(state)][:-1])[sig[1]]
 
 	def getPaid(self, amount):
@@ -82,3 +83,14 @@ class NegationSender(Sender):
 			self.strategy[self.func.index(prevChoice[0]), prevChoice[1][1]] += amount
 		if self._recordStrats:
                     self.recordStrategy()
+
+class FixedNegationSender(NegationSender):
+
+    def __init__(self, states, signals, strategy, func, recordChoices=True, recordStrats=False):
+        NegationSender.__init__(self, states, signals, strategy, func, recordChoices=True, recordStrats=False)
+
+    def getPaid(self, amount):
+	if self._recordStrats:
+            self.recordStrategy()
+
+

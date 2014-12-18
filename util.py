@@ -12,7 +12,8 @@ def weighted_choice(choices):
     assert False, "Shouldn't get here"
 
 def normalize(vec):
-    return vec / np.sum(vec)
+    #a hack for the FuncGame case
+    return vec if np.sum(vec) == 0.0 else vec / np.sum(vec)
 
 def matNormalize(mat):
     row_sums = mat.sum(axis=1)

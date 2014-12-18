@@ -30,6 +30,58 @@ def writeAverages():
     np.savetxt('data/exp1_avg_recA.txt', avgA)
     np.savetxt('data/exp1_avg_neg.txt', avgN)
     np.savetxt('data/exp1_avg_negMINUSrecA.txt', avgdiff)
+
+def writeExp2Averages():
+
+    basePays = [[], [], [], [], [], []]
+    negPays = [[], [], [], [], [], []]
+    finalBase = [[], [], [], [], [], []]
+    finalNeg = [[], [], [], [], [], []]
+    avgB = []
+    avgN = []
+
+    for N in [2,3,4,5,6,7]:
+
+        for i in range(10):
+
+            basePays[N-2].append(np.loadtxt('data/exp2_N'+str(N)+'_funcgame_trial'+str(i)+'_exppay.txt'))
+            negPays[N-2].append(np.loadtxt('data/exp2_N'+str(N)+'_funcgame_constneg_trial'+str(i)+'_exppay.txt'))
+
+        finalBase[N-2] = map(lambda x: x[-1], basePays[N-2])
+        finalNeg[N-2] = map(lambda x: x[-1], negPays[N-2])
+        avgB.append(np.mean(finalBase[N-2]))
+        avgN.append(np.mean(finalNeg[N-2]))
+        np.savetxt('data/exp2_N'+str(N)+'_constbase_finalexps.txt', finalBase[N-2])
+        np.savetxt('data/exp2_N'+str(N)+'_constneg_finalexps.txt', finalNeg[N-2])
+
+    np.savetxt('data/exp2_avg_constbase.txt', avgB)
+    np.savetxt('data/exp2_avg_constneg.txt', avgN)
+
+def writeExp2FuncWeight():
+
+    baseFunc = [[], [], [], [], [], []]
+    negFunc = [[], [], [], [], [], []]
+    finalBase = [[], [], [], [], [], []]
+    finalNeg = [[], [], [], [], [], []]
+    avgB = []
+    avgN = []
+
+    for N in [2,3,4,5,6,7]:
+
+        for i in range(10):
+
+            baseFunc[N-2].append(np.load('data/exp2_N'+str(N)+'_funcgame_trial'+str(i)+'_recfunc.npy'))
+            negFunc[N-2].append(np.load('data/exp2_N'+str(N)+'_funcgame_constneg_trial'+str(i)+'_recfunc.npy'))
+
+        finalBase[N-2] = map(lambda x: x[-1][0], baseFunc[N-2])
+        finalNeg[N-2] = map(lambda x: x[-1][0], negFunc[N-2])
+        avgB.append(np.mean(finalBase[N-2]))
+        avgN.append(np.mean(finalNeg[N-2]))
+        np.savetxt('data/exp2_N'+str(N)+'_constbase_negWeights.txt', finalBase[N-2])
+        np.savetxt('data/exp2_N'+str(N)+'_constneg_negWeights.txt', finalNeg[N-2])
+
+    np.savetxt('data/exp2_avg_negWeight_constbase.txt', avgB)
+    np.savetxt('data/exp2_avg_negWeight_constneg.txt', avgN)
 	
 def writeTtests():
 
