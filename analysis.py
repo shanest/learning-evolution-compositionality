@@ -82,6 +82,32 @@ def writeExp2FuncWeight():
 
     np.savetxt('data/exp2_avg_negWeight_constbase.txt', avgB)
     np.savetxt('data/exp2_avg_negWeight_constneg.txt', avgN)
+
+def writeExp45Averages():
+
+    Pays4 = [[], [], [], [], [], []]
+    Pays5 = [[], [], [], [], [], []]
+    final4 = [[], [], [], [], [], []]
+    final5 = [[], [], [], [], [], []]
+    avgB = []
+    avgN = []
+
+    for N in [2,3,4,5,6,7]:
+
+        for i in range(100):
+
+            Pays4[N-2].append(np.loadtxt('data/exp4_N'+str(N)+'_semi-fixed_1,0_trial'+str(i)+'_exppay.txt'))
+            Pays5[N-2].append(np.loadtxt('data/exp5_N'+str(N)+'_semi-fixed_1,0_trial'+str(i)+'_exppay.txt'))
+
+        final4[N-2] = map(lambda x: x[-1], Pays4[N-2])
+        final5[N-2] = map(lambda x: x[-1], Pays5[N-2])
+        avgN.append(np.mean(final4[N-2]))
+        avgB.append(np.mean(final5[N-2]))
+        np.savetxt('data/exp4_N'+str(N)+'_semi-fixed_1,0_finalexps.txt', final4[N-2])
+        np.savetxt('data/exp5_N'+str(N)+'_semi-fixed_1,0_finalexps.txt', final5[N-2])
+
+    np.savetxt('data/exp4_avg_constneg.txt', avgN)
+    np.savetxt('data/exp5_avg_constbase.txt', avgB)
 	
 def writeTtests():
 
