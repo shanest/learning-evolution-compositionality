@@ -48,7 +48,8 @@ class AtomicReceiver(Receiver):
 
 	def getPaid(self, amount):
 		prevChoice = self._choiceHistory[-1]
-		self.strategy[sum(prevChoice[0]), prevChoice[1]] += amount
+                if self.strategy[sum(prevChoice[0]), prevChoice[1]] + amount > 0:
+		    self.strategy[sum(prevChoice[0]), prevChoice[1]] += amount
 		if self._recordStrats:
                     self.recordStrategy()
 
@@ -80,9 +81,11 @@ class NegationReceiver(Receiver):
 		prevChoice = self._choiceHistory[-1]
 		sig = prevChoice[0]
 		if len(sig) == 1:
-			self.strategy[sum(sig), prevChoice[1]] += amount
+                        if self.strategy[sum(sig), prevChoice[1]] + amount > 0:
+                            self.strategy[sum(sig), prevChoice[1]] += amount
 		elif len(sig) == 2:
-			self.strategy[sig[1], self._func.index(prevChoice[1])] += amount
+                        if self.strategy[sig[1], self._func.index(prevChoice[1])] + amount > 0:
+                            self.strategy[sig[1], self._func.index(prevChoice[1])] += amount
 		else:
 			assert False, "Got to bad place in reinforcment of NegationReceiver"
 		if self._recordStrats:
@@ -108,8 +111,9 @@ class FunctionReceiver(Receiver):
                 self._funcs.append(func)
                 #range gives the identity function
                 self._funcs.append(range(len(actions)))
-                #zeros is constant function
-                self._funcs.append(np.ones(len(actions), dtype=np.int).tolist())
+                #constant function: zeros for `basic state', ones for `negation state'
+                #self._funcs.append(np.ones(len(actions), dtype=np.int).tolist())
+                self._funcs.append(np.zeros(len(actions), dtype=np.int).tolist())
                 self._funcWeights = np.ones((numFuncs))
                 print self.actions
 		print(self._funcs)

@@ -22,7 +22,9 @@ class Sender(object):
 
 	def getPaid(self, amount):
 		prevChoice = self._choiceHistory[-1]
-		self.strategy[prevChoice[0], sum(prevChoice[1])] += amount
+		#need to test for >0 b/c negative reinforcements
+		if self.strategy[prevChoice[0], sum(prevChoice[1])] + amount > 0:
+			self.strategy[prevChoice[0], sum(prevChoice[1])] += amount
 		if self._recordStrats:
                     self.recordStrategy()
 
@@ -77,10 +79,13 @@ class NegationSender(Sender):
 		prevChoice = self._choiceHistory[-1]
 		prevSig = prevChoice[1]
 		if len(prevSig) == 1:
-			self.strategy[prevChoice[0], sum(prevChoice[1])] += amount
+			if self.strategy[prevChoice[0], sum(prevChoice[1])] + amount > 0:
+				self.strategy[prevChoice[0], sum(prevChoice[1])] += amount
 		elif len(prevSig) == 2:
-			self.strategy[prevChoice[0], prevChoice[1][0]] += amount
-			self.strategy[self.func.index(prevChoice[0]), prevChoice[1][1]] += amount
+			if self.strategy[prevChoice[0], prevChoice[1][0]] + amount > 0:
+				self.strategy[prevChoice[0], prevChoice[1][0]] += amount
+			if self.strategy[self.func.index(prevChoice[0]), prevChoice[1][1]] + amount > 0:
+				self.strategy[self.func.index(prevChoice[0]), prevChoice[1][1]] += amount
 		if self._recordStrats:
                     self.recordStrategy()
 
@@ -93,4 +98,17 @@ class FixedNegationSender(NegationSender):
 	if self._recordStrats:
             self.recordStrategy()
 
+#This class will only reinforce for complex signals [N, i].
+class SemiFixedSender(Sender):
 
+	def __init__(self, states, signals, strategy, recordChoices=True, recordStrats=True):
+		self._N = len(states) / 2
+		Sender.__init__(self, states, signals, strategy, recordChoices=True, recordStrats=True)
+
+	def getPaid(self, amount):
+		prevChoice = self._choiceHistory[-1]
+		#need to test for >0 b/c negative reinforcements
+		if (self.strategy[prevChoice[0], sum(prevChoice[1])] + amount > 0) and sum(prevChoice[1]) >= self._N:
+			self.strategy[prevChoice[0], sum(prevChoice[1])] += amount
+		if self._recordStrats:
+                    self.recordStrategy()
